@@ -7,6 +7,14 @@
 <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
 <script type="text/javascript" src="gmaps.js"></script>
 <link rel="stylesheet" type="text/css" href="examples.css" />
+<style>
+input{
+border:none;
+width: 70%;
+font-size: 14px;
+height: 20px;
+}
+</style>
 <script type="text/javascript">
 var map;
 var m1,m2;
@@ -16,8 +24,8 @@ $(document).ready(function(){
 	$('#back').attr('disabled', 'disabled');
 	map = new GMaps({
 		el: '#map',
-		lat: -12.043333,
-		lng: -77.028333,
+		lat: 24.860735,
+		lng: 67.001137,
 		click: function(e){
 			map.hideContextMenu();
 		},
@@ -28,13 +36,14 @@ $(document).ready(function(){
 	map.setContextMenu({
 		control: 'map',
 		options: [{
-			title: 'Set Origen',
+			title: 'Set Origin',
 			name: 'add_marker1',
 			action: function(e){
 				//2do a mas
 				if(m1){
 					for(i=0;i<map.markers.length;i++){
-						if(map.markers[i].getTitle()=='Origen'){
+						console.log("m1 ",map.markers[i].getTitle());
+						if(map.markers[i].getTitle()=='Origin'){
 							map.markers[i].setMap(null);
 						}
 					}
@@ -42,7 +51,7 @@ $(document).ready(function(){
 				m1={
 					lat:e.latLng.lat(),
 					lng:e.latLng.lng(),
-					title:'Origen',
+					title:'Origin',
 					icon:new google.maps.MarkerImage("http://maps.gstatic.com/mapfiles/icon_greenA.png")
 				};
 				this.addMarker(m1);
@@ -50,13 +59,14 @@ $(document).ready(function(){
 				crearRuta();
 			}
 		},{
-			title: 'Set Destino',
+			title: 'Set Destination',
 			name: 'add_marker2',
 			action: function(e){
 				//2do a mas
 				if(m2){
 					for(i=0;i<map.markers.length;i++){
-						if(map.markers[i].getTitle()=='Destino'){
+						console.log("m2 ",map.markers[i].getTitle());
+						if(map.markers[i].getTitle()=='Destination'){
 							map.markers[i].setMap(null);
 						}
 					}
@@ -64,7 +74,7 @@ $(document).ready(function(){
 				m2={
 					lat:e.latLng.lat(),
 					lng:e.latLng.lng(),
-					title:'Destino',
+					title:'Destination',
 					icon:new google.maps.MarkerImage("http://maps.gstatic.com/mapfiles/icon_greenB.png")
 				};
 				this.addMarker(m2);
@@ -72,7 +82,7 @@ $(document).ready(function(){
 				crearRuta();
 			}
 		},{
-			title: 'Centrar Aqui',
+			title: 'Center',
 			name: 'center_here',
 			action: function(e){
 				this.setCenter(e.latLng.lat(), e.latLng.lng());
@@ -107,7 +117,7 @@ $(document).ready(function(){
 			map.removeRoutes();
 			map.cleanRoute();
 			document.getElementById("steps").innerHTML = "";
-			document.getElementById("lblEstado").innerHTML = "Se ha creado una nueva Ruta!";
+			document.getElementById("lblEstado").innerHTML = "A new Route has been created!";
 			map.getRoutes({
 				origin: [m1.lat,m1.lng],
 				destination: [m2.lat,m2.lng],
@@ -140,6 +150,31 @@ $(document).ready(function(){
 		}else
 			return;
 	}
+	
+	$("#myform").submit(function(e){
+		e.preventDefault();
+		let name = $("#name").val();
+		let phone = $("#phone").val();
+		let price = $("#lblPrecio").text();
+		let distance = $("#lblDistancia").text();
+		console.log(name, phone, distance);
+		if(name=="" || phone=="") return alert("Please enter your name and phone no.");
+		$.ajax({
+			url: 'http://localhost:9000/TaxiFareCalculator/FormSubmit.jsp',
+			type: 'POST',
+			data:{
+				origin: 'SSUET',
+				destination: 'North Karachi',
+				name:name,
+				phone:phone,
+				price:price,
+				distance:distance
+			},
+			success: function(data){
+				alert("Your Ride has been booked successfully,")
+			}
+		})
+	});
 });
 </script>
 </head>
@@ -155,10 +190,8 @@ $(document).ready(function(){
 		<label id="lblDistancia">0m.</label><br />
 		<label id="lblTitleP">Approximate Price:</label><br />
 		<label id="lblPrecio">S/. 0.00</label>
-		<br /><br /><br />
-		<label id="lblEst">Route Control:</label><br />
-		<button type="button" id="back">&laquo; Retroceder</button>
-		<button type="button" id="forward">Avanzar &raquo;</button>
+		<br />
+
 		<br /><br /><br />
 		<label id="lblEst">State Of the route:</label><br />
 		<label id="lblEstado">You must establish Origin and Destination</label><br /><br />
@@ -166,8 +199,16 @@ $(document).ready(function(){
 			<ul id="steps" style="list-style-type: square">
 			</ul>
 		</div>
+		<form id="myform">
+		  <div class="form-group">
+			Full Name: <input type="text" class="form-control" id="name" placeholder="Enter your name"> <br/><br/>
+			Phone:  <input type="number" class="form-control" id="phone" placeholder="Enter your phone number">
+			
+		  </div>
+		  <button type="submit" class="btn btn-primary">Submit</button>
+		</form>
     </div>
-  
   </div>
+
 </body>
 </html>
